@@ -20,7 +20,7 @@
            username: ${{ secrets.SERVER_USER }}
            key: ${{ secrets.SERVER_SSH_KEY }}
            script: |
-             cd /home/test.aimwin.in/public_html/siva-sathish-dashboard
+             cd /home/test.aimwin.in/public_html/siva-sathish-dashboard-development
              git pull origin main
              if git diff --name-only HEAD@{1} | grep -qE "package(-lock)?.json"; then
                echo "Dependencies have changed, running npm install..."
@@ -35,4 +35,4 @@
                echo "No changes in dependencies, skipping npm install."
              fi
              npm run build
-             cd ../ && rm -rf assets && cd siva-sathish-dashboard && mv ./dist/* ../
+             cd ../ && rm -rf assets && cd siva-sathish-dashboard-development/ && mv ./dist/* ../
