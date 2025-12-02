@@ -1,0 +1,38 @@
+ name: Deploy to Hostinger
+
+ on:
+   push:
+     branches:
+       - main
+
+ jobs:
+   deploy:
+     runs-on: ubuntu-latest
+
+     steps:
+       - name: Checkout code
+         uses: actions/checkout@v2
+
+       - name: SSH and deploy
+         uses: appleboy/ssh-action@master
+         with:
+           host: ${{ secrets.SERVER_IP }}
+           username: ${{ secrets.SERVER_USER }}
+           key: ${{ secrets.SERVER_SSH_KEY }}
+           script: |
+             cd /home/test.aimwin.in/public_html/siva-sathish-dashboard
+             git pull origin main
+             if git diff --name-only HEAD@{1} | grep -qE "package(-lock)?.json"; then
+               echo "Dependencies have changed, running npm install..."
+               curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+               export NVM_DIR="$HOME/.nvm"
+               [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 
+               [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" 
+               nvm install 20
+               nvm use 20
+               npm install --legacy-peer-deps
+             else
+               echo "No changes in dependencies, skipping npm install."
+             fi
+             npm run build
+             cd ../ && rm -rf assets && cd siva-sathish-dashboard && mv ./dist/* ../
